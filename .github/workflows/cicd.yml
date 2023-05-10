@@ -39,6 +39,9 @@ jobs:
           python -m black .
           git diff --exit-code
 
+      - name: Security check Python code
+        run: python -m bandit -r .
+
       - name: Unit Tests
         run: echo "Unit Tests Placeholder"
 
@@ -50,7 +53,7 @@ jobs:
           tags: |
             type=semver,pattern={{version}}
             type=semver,pattern={{major}}.{{minor}}
-            type=raw,value={{branch}}-{{sha}}-${{ github.run_number }},enable=${{ github.ref_type != 'tag' }}
+            type=raw,value={{sha}}-{{branch}}-${{ github.run_number }},enable=${{ github.ref_type != 'tag' }}
 
       - name: Metadata debug
         run: |
@@ -70,7 +73,7 @@ jobs:
 
       - name: Build and tag Docker image
         run: |
-          docker build -t ${{ steps.login-ecr.outputs.registry }}/${{ steps.metadata.outputs.tags }} .
+          docker build -t ${{ steps.login-ecr.outputs.registry }}/${{ steps.metadata.outputs.tags }} --build-arg APP_VERSION="${{ steps.metadata.outputs.version }}" .
 
       - name: Push Docker image to ECR
         run: |
