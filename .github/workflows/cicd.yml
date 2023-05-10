@@ -1,4 +1,4 @@
-name: CI
+name: CI/CD
 on:
   push:
     branches:
@@ -17,7 +17,8 @@ permissions:
   contents: read    # This is required for actions/checkout
 
 jobs:
-  CI:
+  ci:
+    name: CI
     runs-on: ubuntu-latest
     steps:
       - name: Git clone the repository
@@ -75,3 +76,21 @@ jobs:
         run: |
           docker push ${{ steps.login-ecr.outputs.registry }}/${{ steps.metadata.outputs.tags }}
         if: ${{ github.ref =='refs/heads/main' || github.ref_type == 'tag' }}
+
+  cd_dev:
+    needs: ci
+    name: CD - Dev
+    runs-on: ubuntu-latest
+    if: ${{ github.ref =='refs/heads/main' || github.ref_type == 'tag' }}
+    steps:
+      - name: Deploy to Dev environment
+        run: echo "Dev Environment deployment placeholder"
+
+  cd_prod:
+    needs: cd_dev
+    name: CD - Production
+    runs-on: ubuntu-latest
+    if: ${{ github.ref =='refs/heads/main' || github.ref_type == 'tag' }}
+    steps:
+      - name: Deploy to Production environment
+        run: echo "Production Environment deployment placeholder"
